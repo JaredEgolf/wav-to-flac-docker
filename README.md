@@ -6,5 +6,5 @@ Docker image that converts a directory of wav files using their metatags into fl
 
 ```
 docker build . -t converter
-docker run --name convert --mount type=bind,source="<path-to-input-directory.",target=/wave_input \
+docker run --name convert --mount type=bind,source="<path-to-input-directory>",target=/wave_input \
 --mount type=bind,source="<path-to-output-directory>",target=/flac_output --rm -d converter```
