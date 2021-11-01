@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+# For every file in the directory, execute ffmpeg converting
+# the .wav file to a flac with the same name.
+
+# Ex: for i in *.wav; do ffmpeg -i "$i" -c:a flac "${i%.*}.flac"; done
+
+# If debug parameter is passed, then print the command to stdout
+if [ "$1" == "debug" ]; then
+    echo "Debug Mode On"
+fi
+
+# Mount your directories using docker to this directory
+OUTPUT_DIR="/flac_output"
+
+for file in *.wav; do
+
+    # Use ffprobe to pull the album, artist, title out of the track
+    ffprobe -show_format -print_format json "$file" | jq -r '.format.tags | {album,artist,title}' > output.json
+    
+    # Wait one seconds for the file to be written
+    sleep 1
+
+    # If output.json is empty or only has whitespace, exit the script
+    if [ ! -s output.json ]; then
+        if [ "$1" == "debug" ]; then
+            echo "File: $file has no tags"
+            echo "------------"
+            cat output.json
+            echo "------------" 
+        fi
+        exit 1
+    fi
+
+    # If $OUTPUT_DIR/${cat output.json | jq -r .album} doesn't exist, create it
+    ARTIST=$(cat output.json | jq -r .artist)
+    ALBUM=$(cat output.json | jq -r .album)
+    if [ ! -d "$OUTPUT_DIR/$ARTIST/$ALBUM" ]; then
+        mkdir -p "$OUTPUT_DIR/$ARTIST/$ALBUM"
+    fi
+
+    # Set $DESTINATION_DIR to the path created above
+    DESTINATION_DIR="$OUTPUT_DIR/$ARTIST/$ALBUM"
+
+    # Set filename to the name of the title of the song
+    FILENAME="$(cat output.json | jq -r .title).flac"
+
+    ffmpeg -i "$file" -acodec flac "$DESTINATION_DIR/$FILENAME"
+    if [ "$1" == "debug" ]; then
+        echo "Converted $file to $DESTINATION_DIR/$FILENAME"
+    fi
+done
+
+if [ "$1" == "debug" ]; then
+    echo "Converted all files"
+fi
+
+# Cleanup
+# Ask if the source directory should be deleted and auto delete if no response in 15 seconds else exit
+if [ "$1" == "debug" ]; then
+    read -t 10 -p "Delete source directory? (Y/n) " DELETE_SOURCE
+fi
+
+# If DELETE_SOURCE is null or 'y' then delete *.wav in $SOURCE_DIR
+if [ -z "$DELETE_SOURCE" ] || [ "$DELETE_SOURCE" = "y" ]; then
+    rm *.wav
+    rm output.json
+    if [ "$1" == "debug" ]; then
+        echo "\nDeleted files from source directory"
+        echo "Thank You!"
+    fi
+else
+    if [ "$1" == "debug" ]; then
+        echo "Exiting"
+        echo "Thank You!"
+    fi
+    exit 0
+fi
