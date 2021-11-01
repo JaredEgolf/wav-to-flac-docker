@@ -56,7 +56,7 @@ if [ "$1" == "debug" ]; then
 fi
 
 # Cleanup
-# Ask if the source directory should be deleted and auto delete if no response in 15 seconds else exit
+# Ask if the source directory should be deleted and auto delete if no response in 10 seconds else exit
 if [ "$1" == "debug" ]; then
     read -t 10 -p "Delete source directory? (Y/n) " DELETE_SOURCE
 fi
