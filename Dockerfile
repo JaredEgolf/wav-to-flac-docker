@@ -11,5 +11,5 @@ WORKDIR /wave_input
 # Auto Start Application
 ENTRYPOINT [ "/bin/bash", "/usr/local/bin/convert-to-flac" ]
 # ---or---
-# Debug Start Application (manually start with: /usr/local/bin/convert-to-flac)
+# Debug Start Application (manually start with: /usr/local/bin/convert-to-flac) with or without 'debug' flag
 # ENTRYPOINT [ "/bin/bash" ]
