@@ -1,5 +1,5 @@
 # Pull Image
-FROM jrottenberg/ffmpeg:4.1
+FROM jrottenberg/ffmpeg:4.4
 # Install dependencies
 RUN apt-get update && apt-get install -y jq
 # Set Mount Points
